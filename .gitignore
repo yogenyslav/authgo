@@ -1,0 +1,6 @@
+.DS_Store
+dev.session.sql
+docker-compose.yaml
+config.yaml
+.vscode/
+example/
