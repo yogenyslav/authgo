@@ -34,8 +34,8 @@ execute function authgo.update_user();
 
 -- +goose Down
 -- +goose StatementBegin
-drop schema authgo;
-drop table authgo.user;
+drop trigger trg_update_user on authgo.user;
 drop function authgo.update_user;
-drop trigger trg_update_user;
+drop table authgo.user;
+drop schema authgo;
 -- +goose StatementEnd
