@@ -1,6 +1,5 @@
 -- +goose Up
 -- +goose StatementBegin
-create schema authgo;
 create table authgo.user (
 	id bigserial primary key,
 	email text unique not null,
@@ -30,12 +29,19 @@ create trigger trg_update_user
 before update on authgo.user
 for each row
 execute function authgo.update_user();
+
+create table authgo.user_role (
+	user_id bigint not null,
+	role_id bigint not null,
+	created_at timestamp not null default current_timestamp
+);
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
 drop trigger trg_update_user on authgo.user;
 drop function authgo.update_user;
+
 drop table authgo.user;
-drop schema authgo;
+drop table authgo.user_role;
 -- +goose StatementEnd
