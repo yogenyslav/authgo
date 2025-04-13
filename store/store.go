@@ -13,7 +13,7 @@ import (
 // AuthStore provides methods for user authorization and account management.
 type AuthStore interface {
 	// InsertUser creates a new record with user data.
-	InsertUser(ctx context.Context, u *user.User) (int64, error)
+	InsertUser(ctx context.Context, u *user.Dao) (int64, error)
 }
 
 func applyMigrations(dialect string, migrations embed.FS, db *sql.DB) error {

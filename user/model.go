@@ -2,8 +2,8 @@ package user
 
 import "time"
 
-// User model in data store.
-type User struct {
+// Dao is a user model in data store.
+type Dao struct {
 	ID           int64     `db:"id"`
 	Email        string    `db:"email"`
 	HashPassword string    `db:"hash_password"`

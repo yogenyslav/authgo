@@ -85,7 +85,7 @@ const pgInsertUser = `
 	returning id;
 `
 
-func (s *postgresStore) InsertUser(ctx context.Context, u *user.User) (int64, error) {
+func (s *postgresStore) InsertUser(ctx context.Context, u *user.Dao) (int64, error) {
 	var userID int64
 
 	err := s.pool.QueryRow(
