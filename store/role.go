@@ -1,4 +1,4 @@
-package role
+package store
 
 import (
 	"context"
@@ -7,10 +7,12 @@ import (
 )
 
 type RoleStore interface {
+	Store
 	InsertOne(ctx context.Context, name string) (int64, error)
-	FindOne(ctx context.Context, roleID int64) (model.RoleDao, error)
+	FindOneByID(ctx context.Context, roleID int64) (model.RoleDao, error)
+	FindOneByName(ctx context.Context, name string) (model.RoleDao, error)
 	UpdateOne(ctx context.Context, role model.RoleDao) error
 	DeleteOne(ctx context.Context, roleID int64) error
 	ListAll(ctx context.Context) ([]model.RoleDao, error)
-	ApplyMigrations() error
+	ListUserRoles(ctx context.Context, userID int64) ([]model.RoleDao, error)
 }

@@ -8,6 +8,9 @@ create table authgo.role (
 	is_deleted bool not null default false
 );
 create index role_name on authgo.role using hash(name);
+
+insert into authgo.role (name)
+values ('default');
 -- +goose StatementEnd
 
 -- +goose Down

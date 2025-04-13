@@ -16,6 +16,7 @@ type UserDao struct {
 	IsDeleted    bool      `db:"is_deleted"`
 }
 
+// UserRegister is a model of a Register request.
 type UserRegister struct {
 	Email      string
 	Password   string
@@ -23,4 +24,23 @@ type UserRegister struct {
 	FirstName  string
 	LastName   string
 	MiddleName string
+}
+
+// UserLogin is a model of a Login request.
+type UserLogin struct {
+	Email    string
+	Password string
+}
+
+// AuthMeta is a model with data used to validate user's identity and permissions during requests.
+type AuthMeta struct {
+	UserID int64     `json:"sub"`
+	Roles  []RoleDto `json:"roles"`
+}
+
+// AuthResp is a general response model for requests Login and Register.
+type AuthResp struct {
+	Token string
+	Type  string
+	Meta  AuthMeta
 }
