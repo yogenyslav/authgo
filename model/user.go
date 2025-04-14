@@ -16,6 +16,31 @@ type UserDao struct {
 	IsDeleted    bool      `db:"is_deleted"`
 }
 
+func (u *UserDao) ToDto() UserDto {
+	return UserDto{
+		ID:         u.ID,
+		Email:      u.Email,
+		Username:   u.Username,
+		FirstName:  u.FirstName,
+		LastName:   u.LastName,
+		MiddleName: u.MiddleName,
+		CreatedAt:  u.CreatedAt,
+		UpdatedAt:  u.UpdatedAt,
+	}
+}
+
+// UserDto is a logical model for user.
+type UserDto struct {
+	ID         int64     `db:"id"`
+	Email      string    `db:"email"`
+	Username   string    `db:"username"`
+	FirstName  string    `db:"first_name"`
+	LastName   string    `db:"last_name"`
+	MiddleName string    `db:"middle_name"`
+	CreatedAt  time.Time `db:"created_at"`
+	UpdatedAt  time.Time `db:"updated_at"`
+}
+
 // UserRegister is a model of a Register request.
 type UserRegister struct {
 	Email      string

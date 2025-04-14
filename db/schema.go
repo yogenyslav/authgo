@@ -11,6 +11,7 @@ import (
 //go:embed schema/postgres/*.sql
 var PgMigrations embed.FS
 
+// ApplyMigrations inits required database schema for store.
 func ApplyMigrations(dialect string, migrations embed.FS, db *sql.DB) error {
 	goose.SetBaseFS(migrations)
 

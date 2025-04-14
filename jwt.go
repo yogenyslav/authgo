@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	TypeBearerToken string = "Bearer"
+	typeBearerToken string = "Bearer"
 )
 
 var (
@@ -37,7 +37,7 @@ func newJwtProvider(cfg JwtConfig) *jwtProvider {
 	}
 }
 
-func (j *jwtProvider) CreateAccessToken(meta model.AuthMeta) (string, error) {
+func (j *jwtProvider) createAccessToken(meta model.AuthMeta) (string, error) {
 	key := []byte(j.secret)
 
 	jwtClaims := jwt.MapClaims{
@@ -53,17 +53,17 @@ func (j *jwtProvider) CreateAccessToken(meta model.AuthMeta) (string, error) {
 	}
 
 	if j.encryption != nil {
-		return Encrypt(signedToken, j.encryption)
+		return encrypt(signedToken, j.encryption)
 	}
 
 	return signedToken, nil
 }
 
-func (j *jwtProvider) ParseAccessToken(accessTokenString string) (*jwt.Token, error) {
+func (j *jwtProvider) parseAccessToken(accessTokenString string) (*jwt.Token, error) {
 	var err error
 
 	if j.encryption != nil {
-		accessTokenString, err = Decrypt(accessTokenString, j.encryption)
+		accessTokenString, err = decrypt(accessTokenString, j.encryption)
 		if err != nil {
 			return nil, fmt.Errorf("decrypt token: %w", err)
 		}

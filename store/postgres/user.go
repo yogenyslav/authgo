@@ -21,6 +21,25 @@ func NewUserStore(pg *postgresDB) *userStore {
 	}
 }
 
+func (s *userStore) StartTx(ctx context.Context) (context.Context, error) {
+	return s.pg.StartTx(ctx)
+}
+
+func (s *userStore) CommitTx(ctx context.Context) error {
+	return s.pg.CommitTx(ctx)
+}
+
+func (s *userStore) RollbackTx(ctx context.Context) error {
+	return s.pg.RollbackTx(ctx)
+}
+
+func (s *userStore) ApplyMigrations() error {
+	if err := db.ApplyMigrations("postgres", db.PgMigrations, stdlib.OpenDBFromPool(s.pg.GetPool())); err != nil {
+		return fmt.Errorf("apply migrations: %w", err)
+	}
+	return nil
+}
+
 const insertOneUser = `
 	insert into authgo.user(email, hash_password, username, first_name, last_name, middle_name)
 	values ($1, $2, $3, $4, $5, $6)
@@ -50,6 +69,38 @@ func (s *userStore) InsertOne(ctx context.Context, user model.UserDao) (int64, e
 	}
 
 	return userID, nil
+}
+
+const findOneUserByID = `
+	select id, email, hash_password, username, first_name, last_name, middle_name, created_at, updated_at, is_deleted
+	from authgo.user
+	where id=$1;
+`
+
+func (s *userStore) FindOneByID(ctx context.Context, id int64) (model.UserDao, error) {
+	var user model.UserDao
+
+	conn, err := s.pg.GetConn(ctx)
+	if err != nil {
+		return user, fmt.Errorf("get conn: %w", err)
+	}
+
+	if err := conn.QueryRow(ctx, findOneUserByID, id).Scan(
+		&user.ID,
+		&user.Email,
+		&user.HashPassword,
+		&user.Username,
+		&user.FirstName,
+		&user.LastName,
+		&user.MiddleName,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.IsDeleted,
+	); err != nil {
+		return user, fmt.Errorf("find user: %w", err)
+	}
+
+	return user, nil
 }
 
 const findOneUserByEmail = `
@@ -207,21 +258,25 @@ func (s *userStore) SetRole(ctx context.Context, userID, roleID int64) error {
 	return nil
 }
 
-func (s *userStore) StartTx(ctx context.Context) (context.Context, error) {
-	return s.pg.StartTx(ctx)
-}
+const removeRole = `
+	delete from authgo.user_role
+	where user_id=$1 and role_id=$2;
+`
 
-func (s *userStore) CommitTx(ctx context.Context) error {
-	return s.pg.CommitTx(ctx)
-}
-
-func (s *userStore) RollbackTx(ctx context.Context) error {
-	return s.pg.RollbackTx(ctx)
-}
-
-func (s *userStore) ApplyMigrations() error {
-	if err := db.ApplyMigrations("postgres", db.PgMigrations, stdlib.OpenDBFromPool(s.pg.GetPool())); err != nil {
-		return fmt.Errorf("apply migrations: %w", err)
+func (s *userStore) RemoveRole(ctx context.Context, userID, roleID int64) error {
+	conn, err := s.pg.GetConn(ctx)
+	if err != nil {
+		return fmt.Errorf("get conn: %w", err)
 	}
+
+	res, err := conn.Exec(ctx, removeRole, userID, roleID)
+	if err != nil {
+		return fmt.Errorf("remove role: %w", err)
+	}
+
+	if res.RowsAffected() == 0 {
+		return fmt.Errorf("role not found: %w", pgx.ErrNoRows)
+	}
+
 	return nil
 }

@@ -21,6 +21,25 @@ func NewRoleStore(pg *postgresDB) *roleStore {
 	}
 }
 
+func (s *roleStore) StartTx(ctx context.Context) (context.Context, error) {
+	return s.pg.StartTx(ctx)
+}
+
+func (s *roleStore) CommitTx(ctx context.Context) error {
+	return s.pg.CommitTx(ctx)
+}
+
+func (s *roleStore) RollbackTx(ctx context.Context) error {
+	return s.pg.RollbackTx(ctx)
+}
+
+func (s *roleStore) ApplyMigrations() error {
+	if err := db.ApplyMigrations("postgres", db.PgMigrations, stdlib.OpenDBFromPool(s.pg.GetPool())); err != nil {
+		return fmt.Errorf("apply migrations: %w", err)
+	}
+	return nil
+}
+
 const insertOneRole = `
 	insert into authgo.role(name)
 	values ($1)
@@ -200,23 +219,4 @@ func (s *roleStore) ListUserRoles(ctx context.Context, userID int64) ([]model.Ro
 	}
 
 	return roles, nil
-}
-
-func (s *roleStore) StartTx(ctx context.Context) (context.Context, error) {
-	return s.pg.StartTx(ctx)
-}
-
-func (s *roleStore) CommitTx(ctx context.Context) error {
-	return s.pg.CommitTx(ctx)
-}
-
-func (s *roleStore) RollbackTx(ctx context.Context) error {
-	return s.pg.RollbackTx(ctx)
-}
-
-func (s *roleStore) ApplyMigrations() error {
-	if err := db.ApplyMigrations("postgres", db.PgMigrations, stdlib.OpenDBFromPool(s.pg.GetPool())); err != nil {
-		return fmt.Errorf("apply migrations: %w", err)
-	}
-	return nil
 }

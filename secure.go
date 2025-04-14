@@ -11,8 +11,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// HashPassword hashed a raw password string with bcrypt.
-func HashPassword(password string) (string, error) {
+// hashPassword hashed a raw password string with bcrypt.
+func hashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", fmt.Errorf("bcrypt: %w", err)
@@ -20,13 +20,13 @@ func HashPassword(password string) (string, error) {
 	return string(hashedPassword), nil
 }
 
-// VerifyPassword compares raw password from request with the hashed version.
-func VerifyPassword(hashedPassword, password string) bool {
+// verifyPassword compares raw password from request with the hashed version.
+func verifyPassword(hashedPassword, password string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)) == nil
 }
 
-// Encrypt encrypts a raw string using the provided key and returns the encrypted version.
-func Encrypt(plainText string, key []byte) (string, error) {
+// encrypt encrypts a raw string using the provided key and returns the encrypted version.
+func encrypt(plainText string, key []byte) (string, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", fmt.Errorf("failed to create cipher: %w", err)
@@ -50,8 +50,8 @@ func Encrypt(plainText string, key []byte) (string, error) {
 	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
-// Decrypt decrypts a string that was encrypted using Encrypt.
-func Decrypt(encryptedText string, key []byte) (string, error) {
+// decrypt decrypts a string that was encrypted using Encrypt.
+func decrypt(encryptedText string, key []byte) (string, error) {
 	ciphertext, err := base64.StdEncoding.DecodeString(encryptedText)
 	if err != nil {
 		return "", fmt.Errorf("failed to decode ciphertext: %w", err)
@@ -68,19 +68,19 @@ func Decrypt(encryptedText string, key []byte) (string, error) {
 	}
 
 	nonceSize := aesGCM.NonceSize()
-	
+
 	// ensure the ciphertext is large enough to contain a nonce
 	if len(ciphertext) < nonceSize {
 		return "", fmt.Errorf("ciphertext too short")
 	}
-	
+
 	// extract nonce from the beginning of the ciphertext
 	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
-	
+
 	plaintext, err := aesGCM.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to decrypt: %w", err)
 	}
-	
+
 	return string(plaintext), nil
 }
